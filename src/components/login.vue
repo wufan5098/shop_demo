@@ -11,13 +11,40 @@
       <el-form-item label="用户名" prop="username">
         <el-input v-model="form.username" placeholder="请输入用户名"></el-input>
       </el-form-item>
-      <el-form-item label="密码" prop="password">
+      <!-- 显示密码 -->
+      <el-form-item v-if="visible2" label="密码" prop="password">
         <el-input
           @keyup.enter.native="submit"
           v-model="form.password"
           placeholder="请输入密码"
           type="password"
-        ></el-input>
+        >
+          <i
+            slot="suffix"
+            title="显示密码"
+            @click="changePass('show', 2)"
+            style="cursor:pointer;"
+            class="el-icon-view"
+          ></i>
+        </el-input>
+      </el-form-item>
+      <!-- 隐藏密码 -->
+      <el-form-item v-else label="密码" prop="password">
+        <el-input
+          @keyup.enter.native="submit"
+          v-model="form.password"
+          placeholder="请输入密码"
+          type="text"
+        >
+          <i
+            slot="suffix"
+            title="显示密码"
+            @click="changePass('hide', 2)"
+            style="cursor:pointer;"
+            class="el-icon-close-notification
+"
+          ></i>
+        </el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submit">登录</el-button>
@@ -32,6 +59,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
+      visible2: true,
       form: {
         username: '',
         password: ''
@@ -55,6 +83,9 @@ export default {
   },
 
   methods: {
+    changePass(value, kind) {
+      this.visible2 = !(value === 'show')
+    },
     // 重置
     resetForm() {
       this.$refs.form.resetFields()
@@ -68,13 +99,13 @@ export default {
             method: 'post',
             data: this.form
           }).then(res => {
-            console.log(res.data)
+            // console.log(res.data)
             if (res.data.meta.status === 200) {
               this.$message({
                 showClose: true,
                 message: res.data.meta.msg,
                 type: 'success',
-                duration: 2000
+                duration: 1000
               })
               localStorage.setItem('token', res.data.data.token)
               this.$router.push('/home')
@@ -83,12 +114,18 @@ export default {
                 showClose: true,
                 message: res.data.meta.msg,
                 type: 'error',
-                duration: 3000
+                duration: 1000
               })
             }
           })
         } else {
-          console.log('校验没通过')
+          this.$message({
+            showClose: true,
+            message: '请正确输入用户名或密码',
+            type: 'warning',
+            duration: 1000
+          })
+          // console.log('校验没通过')
           return false
         }
       })
