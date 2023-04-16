@@ -7,7 +7,19 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/common.css'
 import axios from 'axios'
+import ElTreeGrid from 'element-tree-grid'
+import moment from 'moment'
+import VueQuillEditor from 'vue-quill-editor'
+import 'quill/dist/quill.core.css' // import styles
+import 'quill/dist/quill.snow.css' // for snow theme
+import 'quill/dist/quill.bubble.css' // for bubble theme
 
+Vue.use(VueQuillEditor /* { default global options } */)
+
+Vue.filter('dateFilter', (input, format = 'YYYY-MM-DD HH:mm:ss') => {
+  return moment(input * 1000).format(format)
+})
+Vue.component(ElTreeGrid.name, ElTreeGrid)
 // 将axios添加到vue原型上
 Vue.prototype.axios = axios
 axios.defaults.baseURL = 'http://localhost:8888/api/private/v1/'
@@ -15,7 +27,7 @@ axios.defaults.baseURL = 'http://localhost:8888/api/private/v1/'
 axios.interceptors.request.use(
   function(config) {
     // 在发送请求之前做些什么
-    if (config.url.includes('login') <= 0) {
+    if (config.url.indexOf('login') <= 0) {
       config.headers.Authorization = localStorage.getItem('token')
     }
     return config
@@ -35,6 +47,7 @@ axios.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 /* eslint-disable no-new */

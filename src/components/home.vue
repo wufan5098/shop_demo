@@ -12,36 +12,31 @@
     <el-container>
       <el-aside width="200px">
         <el-menu
-          default-active="/users"
           class="el-menu-vertical-demo"
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b"
           unique-opened
           router
+          :default-active="$route.path.slice(1).split('-')[0]"
         >
-          <el-submenu index="1">
+          <span v-if="menuList.length === 0">暂无权限</span>
+          <el-submenu
+            v-for="menu in menuList"
+            :key="menu.id"
+            :index="menu.path"
+          >
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{ menu.authName }}</span>
             </template>
-            <el-menu-item index="/users">
+            <el-menu-item
+              v-for="item in menu.children"
+              :key="item.id"
+              :index="item.path"
+            >
               <i class="el-icon-menu"></i>
-              <span slot="title">用户列表</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item index="2-1">
-              <i class="el-icon-menu"></i>
-              <span slot="title">角色列表</span>
-            </el-menu-item>
-            <el-menu-item index="2-2">
-              <i class="el-icon-menu"></i>
-              <span slot="title">权限列表</span>
+              <span slot="title">{{ item.authName }}</span>
             </el-menu-item>
           </el-submenu>
         </el-menu>
@@ -56,34 +51,46 @@
 
 <script>
 export default {
+  data() {
+    return {
+      menuList: []
+    }
+  },
   methods: {
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath)
-    },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath)
-    },
-    logout() {
-      this.$confirm('此操作将退出登录, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-        roundButton: true
-      })
-        .then(() => {
-          localStorage.removeItem('token')
-          this.$router.push('/')
-          this.$message({
-            type: 'success',
-            message: '退出已成功!'
-          })
+    async logout() {
+      try {
+        await this.$confirm('此操作将退出登录, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          roundButton: true
         })
-        .catch(() => {
-          this.$message({
-            type: 'error',
-            message: '退出已取消'
-          })
+        localStorage.removeItem('token')
+        this.$router.push('/')
+        this.$message({
+          type: 'success',
+          message: '退出已成功!'
         })
+      } catch (error) {
+        this.$message({
+          type: 'error',
+          message: '退出已取消'
+        })
+      }
+    }
+  },
+  async created() {
+    try {
+      let res = await this.axios.get('menus')
+      let {
+        data,
+        meta: { status }
+      } = res
+      if (status === 200) {
+        this.menuList = data
+      }
+    } catch (error) {
+      this.$message.error('555')
     }
   }
 }

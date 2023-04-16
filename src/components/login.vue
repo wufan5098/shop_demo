@@ -53,7 +53,6 @@
     </el-form>
   </div>
 </template>
-
 <script>
 export default {
   data() {
@@ -80,7 +79,6 @@ export default {
       }
     }
   },
-
   methods: {
     changePass(value, kind) {
       this.visible2 = !(value === 'show')
@@ -91,31 +89,30 @@ export default {
     },
     // 提交
     submit() {
-      this.$refs.form.validate(valid => {
+      this.$refs.form.validate(async valid => {
         if (valid) {
-          this.axios({
+          let res = await this.axios({
             url: 'login',
             method: 'post',
             data: this.form
-          }).then(res => {
-            if (res.meta.status === 200) {
-              this.$message({
-                showClose: true,
-                message: res.meta.msg,
-                type: 'success',
-                duration: 1000
-              })
-              localStorage.setItem('token', res.data.token)
-              this.$router.push('/users')
-            } else {
-              this.$message({
-                showClose: true,
-                message: res.meta.msg,
-                type: 'error',
-                duration: 1000
-              })
-            }
           })
+          if (res.meta.status === 200) {
+            this.$message({
+              showClose: true,
+              message: res.meta.msg,
+              type: 'success',
+              duration: 1000
+            })
+            localStorage.setItem('token', res.data.token)
+            this.$router.push('/users')
+          } else {
+            this.$message({
+              showClose: true,
+              message: res.meta.msg,
+              type: 'error',
+              duration: 1000
+            })
+          }
         } else {
           this.$message({
             showClose: true,
